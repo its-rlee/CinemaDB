@@ -1,0 +1,19 @@
+.App {
+  text-align: center;
+}
+
+.data-fetcher-container {
+  border: 1px solid #ccc;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.data-fetcher-heading {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.data-fetcher-info {
+  font-size: 1rem;
+  margin-bottom: 5px;
+}
