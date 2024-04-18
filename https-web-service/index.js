@@ -8,6 +8,7 @@ const cors = require('cors')
 const settings = require('./settings')
 const routes = require('./routes/routes');
 const logger = require('./logger');
+const { checkAndTransferData } = require('./database');
 
 
 // Create Express app
@@ -35,7 +36,8 @@ try {
 }
 
 // Function to start the server
-const startServer = () => {
+const startServer = async () => {
+    await checkAndTransferData();
     const server = https.createServer(options, app);
     server.listen(port, () => {
         logger.info(`Server running on https://localhost:${port}`);

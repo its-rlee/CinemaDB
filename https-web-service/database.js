@@ -22,8 +22,31 @@ async function connectToDatabase() {
     }
 }
 
+// Function to check and transfer data
+async function checkAndTransferData() {
+    const db = await connectToDatabase();
+    const targetCollection = db.collection('movies');
+    const count = await targetCollection.countDocuments();
+
+    if (count === 0) {
+        console.log("No movies found in 'final_project', transferring from 'sample_mflix'...");
+        const sourceDb = client.db("sample_mflix");
+        const sourceCollection = sourceDb.collection('movies');
+        const moviesToTransfer = await sourceCollection.find().limit(100).toArray();
+        if (moviesToTransfer.length > 0) {
+            await targetCollection.insertMany(moviesToTransfer);
+            console.log(`${moviesToTransfer.length} movies transferred to 'final_project' database`);
+        }
+    } else {
+        console.log("Movies collection already has data. No data transferred.");
+    }
+}
+
 // // Connect to the database and export the client
 // connect().catch(console.error);
 
 // Export the MongoClient to use it in other parts of your app
-module.exports = connectToDatabase;
+module.exports = {
+    connectToDatabase,
+    checkAndTransferData
+};

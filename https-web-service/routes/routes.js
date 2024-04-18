@@ -4,7 +4,11 @@ const logger = require('../logger')
 
 const { ObjectId } = require('mongodb');
 
-const connectToDatabase = require('../database')
+const { fetchMovieDataFromAPI } = require('../controllers/apiService');
+const { connectToDatabase } = require('../database');
+
+
+
 
 // Get client's device type & IP address    
 router.use((req, res, next) => {
@@ -75,7 +79,7 @@ router.patch('/movies/:id', async (req, res) => {
 
         const result = await collection.updateOne({ _id: new ObjectId(req.params.id) }, { $set: req.body });
         if (result.modifiedCount === 0) {
-            return res.status(404).send('Movie with the specified ID not found');
+            return res.status(404).send('Movie with the specified ID not found and/or not updated');
         }
         res.send('Movie updated successfully');
     } catch (error) {
@@ -91,7 +95,7 @@ router.delete('/movies/:id', async (req, res) => {
 
         const result = await collection.deleteOne({ _id: new ObjectId(req.params.id) });
         if (result.deletedCount === 0) {
-            return res.status(404).send('Movie with the specified ID not found');
+            return res.status(404).send('Movie with the specified ID not found and/or not deleted');
         }
         res.send('Movie deleted successfully');
     } catch (error) {
@@ -100,6 +104,22 @@ router.delete('/movies/:id', async (req, res) => {
     }
 });
 
+router.post('/movies', async (req, res) => {
+    const { title } = req.body;
+    const apiData = await fetchMovieDataFromAPI(title);
 
+    const db = await connectToDatabase();
+    const collection = db.collection('movies');
+
+    // Merge API data with user input data
+    const movieData = { ...req.body, ...apiData };
+
+    try {
+        await collection.insertOne(movieData);
+        res.status(201).send('Movie added successfully');
+    } catch (error) {
+        res.status(500).json({ error: error.toString() });
+    }
+});
 
 module.exports = router;
